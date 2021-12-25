@@ -69,6 +69,6 @@ app.use((error, req, res, next) => {
     })
 })
 
-app.listen(3001, ()=> console.log('App running on localhost:3001'));
+app.listen(3000, ()=> console.log('App running on localhost:3000'));
 
 
