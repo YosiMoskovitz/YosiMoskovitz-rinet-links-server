@@ -5,7 +5,7 @@ import Auth from '../middlewares/JwtAuth.js';
 const router = express.Router();
 const PATH = "/links";
 
-import  Controller  from '../controllers/Links.js'
+import  Controller  from '../controllers/links.js'
 
 
 router.get('/', Controller.getLinks);
