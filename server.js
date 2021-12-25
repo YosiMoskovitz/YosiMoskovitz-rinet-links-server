@@ -33,19 +33,19 @@ app.use(express.urlencoded({
 }))
 
 //workAround cros error from react because of axios error
-var whitelist = ['http://localhost:3000',, /** other domains if any */ ]
+var whitelist = ['147.234.64.39:3000', /** other domains if any */ ]
 var corsOptions = {
   credentials: true,
-  // origin: (origin, callback)=> {
-  //   if (whitelist.indexOf(origin) !== -1) {
-  //     callback(null, true)
-  //   } else {
-  //     callback(new Error('Not allowed by CORS'))
-  //   }
-  // }
+  origin: (origin, callback)=> {
+    if (whitelist.indexOf(origin) !== -1) {
+      callback(null, true)
+    } else {
+      callback(new Error('Not allowed by CORS'))
+    }
+  }
 }
 
-app.use(cors({credentials: true}));
+app.use(cors(corsOptions));
 
 
 app.use(main.PATH, main.router)
