@@ -5,13 +5,19 @@ export default {
     checkAuth: (req, res, next) => {
         try {
             const token = req.cookies.token;
-            console.log('jwt token checked')
-            console.log(token)
-            jwt.verify(token, process.env.JWT_KEY)
+            if (!token) {
+                const error = {
+                    code: 401,
+                    message: "Token was not provided" 
+                }
+                throw error
+            }
+            const user = jwt.verify(token, process.env.JWT_KEY);
+            req.user = {id: user.id};
             next();
         } catch (error) {
-            res.status(222).json({
-                message: 'Auth Failed',
+            res.status(401).json({
+               message: error.message,
             })
         }
     },
@@ -19,7 +25,8 @@ export default {
         const accessToken = jwt.sign({
             id: user._id, email: user.email
         },
-            process.env.JWT_KEY);
+            process.env.JWT_KEY,
+            { expiresIn: '1d' });
         return accessToken;
-    }
+    },
 }

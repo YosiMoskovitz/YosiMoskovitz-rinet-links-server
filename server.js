@@ -6,11 +6,10 @@ import cors from 'cors';
 import dotenv from 'dotenv'
 import cookieParser from 'cookie-parser';
 
-import main from './api/routes/main.js'
 import links from './api/routes/links.js'
 import users from './api/routes/users.js'
 import categories from './api/routes/categories.js'
-import GDriveupload from './api/routes/GDriveuplod.js'
+import googleDrive from './api/routes/gDrive.js'
 
 dotenv.config();
 const app = express();
@@ -25,34 +24,40 @@ mongoose.connection.on('connected', ()=> {
     console.log('mongoDB Connected!')
 })
 
-app.use(morgan('dev'));
+// app.use(morgan('dev'));
 app.use(express.json());
 app.use(cookieParser())
 app.use(express.urlencoded({
     extended: false
 }))
 
-//workAround cros error from react because of axios error
-var whitelist = ['147.234.64.39:3000', /** other domains if any */ ]
-var corsOptions = {
-  credentials: true,
-  origin: (origin, callback)=> {
-    if (whitelist.indexOf(origin) !== -1) {
-      callback(null, true)
-    } else {
-      callback(new Error('Not allowed by CORS'))
-    }
-  }
+//dev cors allowance
+const corsOptionsDelegate = (req, cb)=> {
+    var corsOptions = {
+        credentials: true,
+        origin: req.headers.origin
+      }
+      cb(null, corsOptions)
 }
 
-app.use(cors(corsOptions));
+// var allowlist = ['http://example1.com', 'http://example2.com']
+// var corsOptionsDelegate = (req, callback)=> {
+//   var corsOptions;
+//   if (allowlist.indexOf(req.header('Origin')) !== -1) {
+//     corsOptions = { origin: true } // reflect (enable) the requested origin in the CORS response
+//   } else {
+//     corsOptions = { origin: false } // disable CORS for this request
+//   }
+//   callback(null, corsOptions) // callback expects two parameters: error and options
+// }
+
+app.use(cors(corsOptionsDelegate));
 
 
-app.use(main.PATH, main.router)
 app.use(links.PATH, links.router)
 app.use(users.PATH, users.router);
 app.use(categories.PATH, categories.router);
-app.use(GDriveupload.PATH, GDriveupload.router)
+app.use(googleDrive.PATH, googleDrive.router)
 
 
 
@@ -69,6 +74,6 @@ app.use((error, req, res, next) => {
     })
 })
 
-app.listen(process.env.PORT || 3000, ()=> console.log(`App running on ${process.env.PORT}`));
+app.listen(process.env.PORT || 3001, ()=> console.log(`App running on ${process.env.PORT}`));
 
 

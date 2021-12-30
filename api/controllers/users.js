@@ -65,8 +65,7 @@ export default {
         }).then((user) => {
             res.cookie('token', user.token, { httpOnly: true }).
                 status(200).json({
-                    user: user.user,
-                    auth_token: "user got a token"
+                    user: user.user
                 })
         }).catch((error) => {
             if (!error.code) {
@@ -75,12 +74,44 @@ export default {
             res.status(error.code).json(error.message)
         });
     },
+    logout: (req, res) => {
+        res.clearCookie('token').status(200).json({
+            status: 'OK'
+        })
+    },
     getUserByEmail: (req, res) => {
         const email  = req.params.email;
         User.findOne({ email }).then((user) => {
             user != null ? res.status(302).json(user) : res.status(404).json('NOT_FOUND')
         }).catch((error) => {
             error
+        })
+    },
+    userAuth: (req, res) => {
+        const userID = req.user.id;
+        User.findOne({ _id: userID }).then((user)=> {
+            if (!user) {
+                const error = {
+                    code: 404,
+                    message: "USER_NOT_FOUND"
+                }
+                throw error
+            }
+            res.status(200).json({
+                firstName: user.firstName,
+                lastName: user.lastName,
+            })
+        })
+    },
+    getUsers : (req, res) => {
+        User.find().then((users) => {
+            res.status(200).json({
+                users
+            })
+        }).catch(error => {
+            res.status(500).json({
+                error
+            })
         })
     }
     

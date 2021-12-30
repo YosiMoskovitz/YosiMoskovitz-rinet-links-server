@@ -1,6 +1,6 @@
 import { google } from "googleapis";
 import { EventEmitter } from 'events'
-import upload from '../middlewares/multer.js';
+import upload from '../api/middlewares/multer.js';
 import * as fs from "fs";
 import dotenv from 'dotenv'
 dotenv.config()

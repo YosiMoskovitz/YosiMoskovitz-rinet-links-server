@@ -44,13 +44,13 @@ export default {
     },
 
     addLink: (req, res) => {
-        const { title, path, categoryId,  description} = req.body;
+        const { title, path, categoryId, description } = req.body;
 
         Category.findById(categoryId).then((category) => {
             if (!category) {
                 const error = {
                     code: 404,
-                    message: "Category not found" 
+                    message: "Category not found"
                 }
                 throw error
             }
@@ -99,5 +99,23 @@ export default {
                 error
             })
         });
+    },
+    getLinksAndCategories: (req, res) => {
+        var data = {}
+        Links.find().then((links) => {
+            data = { ...data, links }
+        }).then(() => {
+            Category.find().then((categories) => {
+                data = { ...data, categories }
+                res.status(200).json({
+                    data
+                })
+            })
+        }).catch(error => {
+                res.status(500).json({
+                    error
+                })
+            })
     }
+
 }
