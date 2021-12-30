@@ -40,9 +40,10 @@ app.use(express.urlencoded({
 //       cb(null, corsOptions)
 // }
 
-var allowlist = ['http://localhost', 'http://localhost:3000']
+var allowlist = ['http://localhost:3000', '147.234.64.39']
 var corsOptionsDelegate = (req, callback)=> {
   var corsOptions;
+  console.log(req.header('Origin'))
   if (allowlist.indexOf(req.header('Origin')) !== -1) {
     corsOptions = { origin: true } // reflect (enable) the requested origin in the CORS response
   } else {
