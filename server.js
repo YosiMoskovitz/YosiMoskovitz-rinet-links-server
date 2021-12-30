@@ -24,7 +24,7 @@ mongoose.connection.on('connected', ()=> {
     console.log('mongoDB Connected!')
 })
 
-app.use(morgan('dev'));
+// app.use(morgan('dev'));
 app.use(express.json());
 app.use(cookieParser())
 app.use(express.urlencoded({
