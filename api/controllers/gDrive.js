@@ -41,9 +41,7 @@ export default {
                     maxRedirects: 0,
                     onUploadProgress: (evt) => {
                         const progress = (evt.bytesRead / fileSize) * 100;
-                        process.stdout.clearLine();
-                        process.stdout.cursorTo(0);
-                        process.stdout.write(`${Math.round(progress)}% complete`);
+                        res.send(`${Math.round(progress)}% complete`)
                     },
                     
                 },
