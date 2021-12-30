@@ -45,6 +45,7 @@ export default {
                         process.stdout.cursorTo(0);
                         process.stdout.write(`${Math.round(progress)}% complete`);
                     },
+                    
                 },
             )
             .then((response) => {
@@ -69,8 +70,14 @@ export default {
                 res.status(200).json({
                     link : response.data.webContentLink
                 })
+            })
+            .catch((error)=>{
+                res.status(500).json({
+                    error
+                })
             });
         } catch (error) {
+            console.log('??????')
             console.log(error.message);
         }
     },
