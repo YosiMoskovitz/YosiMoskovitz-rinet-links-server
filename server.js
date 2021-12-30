@@ -32,24 +32,24 @@ app.use(express.urlencoded({
 }))
 
 //dev cors allowance
-const corsOptionsDelegate = (req, cb)=> {
-    var corsOptions = {
-        credentials: true,
-        origin: req.headers.origin
-      }
-      cb(null, corsOptions)
-}
-
-// var allowlist = ['http://example1.com', 'http://example2.com']
-// var corsOptionsDelegate = (req, callback)=> {
-//   var corsOptions;
-//   if (allowlist.indexOf(req.header('Origin')) !== -1) {
-//     corsOptions = { origin: true } // reflect (enable) the requested origin in the CORS response
-//   } else {
-//     corsOptions = { origin: false } // disable CORS for this request
-//   }
-//   callback(null, corsOptions) // callback expects two parameters: error and options
+// const corsOptionsDelegate = (req, cb)=> {
+//     var corsOptions = {
+//         credentials: true,
+//         origin: req.headers.origin,
+//       }
+//       cb(null, corsOptions)
 // }
+
+var allowlist = ['http://localhost', 'http://localhost:3000']
+var corsOptionsDelegate = (req, callback)=> {
+  var corsOptions;
+  if (allowlist.indexOf(req.header('Origin')) !== -1) {
+    corsOptions = { origin: true } // reflect (enable) the requested origin in the CORS response
+  } else {
+    corsOptions = { origin: false } // disable CORS for this request
+  }
+  callback(null, corsOptions) // callback expects two parameters: error and options
+}
 
 app.use(cors(corsOptionsDelegate));
 
