@@ -32,24 +32,24 @@ app.use(express.urlencoded({
 }))
 
 //dev cors allowance
-// const corsOptionsDelegate = (req, cb)=> {
-//     var corsOptions = {
-//         credentials: true,
-//         origin: req.headers.origin,
-//       }
-//       cb(null, corsOptions)
-// }
-
-var allowlist = ['https://rinet-links-client.vercel.app/']
-var corsOptionsDelegate = (req, callback)=> {
-  var corsOptions;
-  if (allowlist.indexOf(req.header('Origin')) !== -1) {
-    corsOptions = { origin: true } // reflect (enable) the requested origin in the CORS response
-  } else {
-    corsOptions = { origin: false } // disable CORS for this request
-  }
-  callback(null, corsOptions) // callback expects two parameters: error and options
+const corsOptionsDelegate = (req, cb)=> {
+    var corsOptions = {
+        credentials: true,
+        origin: "https://rinet-links-client.vercel.app",
+      }
+      cb(null, corsOptions)
 }
+
+// var allowlist = ['https://rinet-links-client.vercel.app/']
+// var corsOptionsDelegate = (req, callback)=> {
+//   var corsOptions;
+//   if (allowlist.indexOf(req.header('Origin')) !== -1) {
+//     corsOptions = { origin: true } // reflect (enable) the requested origin in the CORS response
+//   } else {
+//     corsOptions = { origin: false } // disable CORS for this request
+//   }
+//   callback(null, corsOptions) // callback expects two parameters: error and options
+// }
 
 app.use(cors(corsOptionsDelegate));
 
