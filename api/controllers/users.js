@@ -6,7 +6,7 @@ import Auth from '../middlewares/JwtAuth.js'
 
 export default {
     signUp: (req, res) => {
-        const { email, password, firstName, lastName } = req.body;
+        const { email, password, firstName, lastName, role } = req.body;
         User.findOne({ email }).then(async (user) => {
             if (user) {
                 const error = {
@@ -20,7 +20,8 @@ export default {
                 email,
                 password: hashPass,
                 firstName,
-                lastName
+                lastName,
+                role
             })
             return newUser.save()
         }).then(() => {
@@ -63,7 +64,7 @@ export default {
             };
 
         }).then((user) => {
-            res.cookie('token', user.token, { httpOnly: true, sameSite: 'None', secure: true }).
+            res.cookie('token', user.token, { httpOnly: true,  sameSite: 'None', secure: true}). // 
                 status(200).json({
                     user: user.user
                 })

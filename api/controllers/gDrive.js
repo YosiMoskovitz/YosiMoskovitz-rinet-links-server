@@ -46,7 +46,6 @@ export default {
                 },
             )
             .then((response) => {
-                console.log('yup')
                 //give public Permission
                 const fileId = response.data.id;
                 drive.permissions.create({
@@ -74,7 +73,6 @@ export default {
                 })
             });
         } catch (error) {
-            console.log('??????')
             console.log(error.message);
         }
     },

@@ -14,6 +14,7 @@ import mailer from './api/routes/gmailer.js'
 
 dotenv.config();
 const app = express();
+const port = process.env.PORT || 3001
 
 mongoose.connect(process.env.MONGO_CONNECTION, {
     useUnifiedTopology: true,
@@ -21,7 +22,7 @@ mongoose.connect(process.env.MONGO_CONNECTION, {
     useCreateIndex: true
 });
 
-mongoose.connection.on('connected', ()=> {
+mongoose.connection.on('connected', () => {
     console.log('mongoDB Connected!')
 })
 
@@ -33,24 +34,28 @@ app.use(express.urlencoded({
 }))
 
 //dev cors allowance
-const corsOptionsDelegate = (req, cb)=> {
-    var corsOptions = {
-        credentials: true,
-        origin: req.header('Origin'),
-      }
-      cb(null, corsOptions)
-}
-
-// var allowlist = ['http://example1.com', 'http://example2.com']
-// var corsOptionsDelegate = (req, callback)=> {
-//   var corsOptions;
-//   if (allowlist.indexOf(req.header('Origin')) !== -1) {
-//     corsOptions = { origin: true } // reflect (enable) the requested origin in the CORS response
-//   } else {
-//     corsOptions = { origin: false } // disable CORS for this request
-//   }
-//   callback(null, corsOptions) // callback expects two parameters: error and options
+// const corsOptionsDelegate = (req, cb)=> {
+//     var corsOptions = {
+//         credentials: true,
+//         origin: req.header('Origin'),
+//       }
+//       cb(null, corsOptions)
 // }
+
+var allowlist = [
+    'https://rinet-links.vercel.app',
+    'https://rinet-links-client-j675gdkog-yosimoskovitz.vercel.app/',
+    'https://rinet-links-client.vercel.app/'
+    ]
+var corsOptionsDelegate = (req, callback) => {
+    var corsOptions;
+    if (allowlist.indexOf(req.header('Origin')) !== -1) {
+        corsOptions = { origin: req.header('Origin') } // reflect (enable) the requested origin in the CORS response
+    } else {
+        corsOptions = { origin: false } // disable CORS for this request
+    }
+    callback(null, corsOptions) // callback expects two parameters: error and options
+}
 
 app.use(cors(corsOptionsDelegate));
 
@@ -76,6 +81,6 @@ app.use((error, req, res, next) => {
     })
 })
 
-app.listen(process.env.PORT || 3001, ()=> console.log(`App running on ${process.env.PORT}`));
+app.listen(port, () => console.log(`Listening on Port ${port}`));
 
 
