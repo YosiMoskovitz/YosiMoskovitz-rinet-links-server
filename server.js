@@ -47,18 +47,21 @@ var allowlist = [
     'https://rinet-links-client-j675gdkog-yosimoskovitz.vercel.app/',
     'https://rinet-links-client.vercel.app/'
     ]
-var corsOptionsDelegate = (req, callback) => {
-    var corsOptions;
-    if (allowlist.includes(req.header.origin)) {
-        console.log(req.header.origin)
-        corsOptions = { credentials: true, origin: req.header.origin } // reflect (enable) the requested origin in the CORS response
-    } else {
-        corsOptions = { origin: false } // disable CORS for this request
-    }
-    callback(null, corsOptions) // callback expects two parameters: error and options
-}
+// var corsOptionsDelegate = (req, callback) => {
+//     var corsOptions;
+//     if (allowlist.includes(req.header.origin)) {
+//         console.log(req.header('Origin'))
+//         corsOptions = { credentials: true, origin: req.header('Origin') } // reflect (enable) the requested origin in the CORS response
+//     } else {
+//         corsOptions = { origin: false } // disable CORS for this request
+//     }
+//     callback(null, corsOptions) // callback expects two parameters: error and options
+// }
 
-app.use(cors(corsOptionsDelegate));
+app.use(cors({
+    credentials: true,
+    origin: allowlist
+}));
 
 
 app.use(links.PATH, links.router)
