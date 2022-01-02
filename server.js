@@ -10,6 +10,7 @@ import links from './api/routes/links.js'
 import users from './api/routes/users.js'
 import categories from './api/routes/categories.js'
 import googleDrive from './api/routes/gDrive.js'
+import mailer from './api/routes/gmailer.js'
 
 dotenv.config();
 const app = express();
@@ -35,12 +36,12 @@ app.use(express.urlencoded({
 const corsOptionsDelegate = (req, cb)=> {
     var corsOptions = {
         credentials: true,
-        origin: "https://rinet-links-client.vercel.app",
+        origin: req.header('Origin'),
       }
       cb(null, corsOptions)
 }
 
-// var allowlist = ['https://rinet-links-client.vercel.app/']
+// var allowlist = ['http://example1.com', 'http://example2.com']
 // var corsOptionsDelegate = (req, callback)=> {
 //   var corsOptions;
 //   if (allowlist.indexOf(req.header('Origin')) !== -1) {
@@ -58,6 +59,7 @@ app.use(links.PATH, links.router)
 app.use(users.PATH, users.router);
 app.use(categories.PATH, categories.router);
 app.use(googleDrive.PATH, googleDrive.router)
+app.use(mailer.PATH, mailer.router)
 
 
 

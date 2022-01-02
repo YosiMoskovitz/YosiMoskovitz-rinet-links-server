@@ -7,7 +7,6 @@ const PATH = "/links";
 
 import  Controller  from '../controllers/links.js'
 
-
 router.get('/', Controller.getLinks);
 router.get('/fullData', Controller.getLinksAndCategories);
 router.get('/link:linkID', Controller.getLinkById);
