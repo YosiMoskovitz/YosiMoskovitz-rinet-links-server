@@ -58,10 +58,17 @@ var allowlist = [
 //     callback(null, corsOptions) // callback expects two parameters: error and options
 // }
 
-app.use(cors({
+const corsOptions = {
     credentials: true,
-    origin: allowlist
-}));
+    origin: (origin, callback) => {
+      if (allowlist.indexOf(origin) !== -1) {
+        callback(null, true)
+      } else {
+        callback(new Error())
+      }
+    }
+  }
+app.use(cors(corsOptions));
 
 
 app.use(links.PATH, links.router)
