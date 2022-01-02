@@ -44,15 +44,17 @@ app.use(express.urlencoded({
 
 var allowlist = [
     'https://rinet-links.vercel.app',
-    'https://rinet-links-client-j675gdkog-yosimoskovitz.vercel.app/',
-    'https://rinet-links-client.vercel.app/'
+    'https://rinet-links-client-j675gdkog-yosimoskovitz.vercel.app',
+    'https://rinet-links-client.vercel.app',
+    'http://localhost:3000'
     ]
 // var corsOptionsDelegate = (req, callback) => {
 //     var corsOptions;
 //     if (allowlist.includes(req.header.origin)) {
 //         console.log(req.header('Origin'))
-//         corsOptions = { credentials: true, origin: req.header('Origin') } // reflect (enable) the requested origin in the CORS response
+//         corsOptions = { credentials: true, origin: req.header.origin } // reflect (enable) the requested origin in the CORS response
 //     } else {
+//         new Error('Blocked By CORS!' + req.header)
 //         corsOptions = { origin: false } // disable CORS for this request
 //     }
 //     callback(null, corsOptions) // callback expects two parameters: error and options
@@ -64,7 +66,7 @@ const corsOptions = {
       if (allowlist.indexOf(origin) !== -1) {
         callback(null, true)
       } else {
-        callback(new Error())
+        callback(new Error('Blocked By CORS!'))
       }
     }
   }
