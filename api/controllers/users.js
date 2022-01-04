@@ -72,7 +72,7 @@ export default {
             };
 
         }).then((user) => {
-            res.cookie('token', user.token, { httpOnly: true, }). // sameSite: 'None', secure: true 
+            res.cookie('token', user.token, { httpOnly: true, sameSite: 'None', secure: true }). // 
                 status(200).json({
                     user: user.user
                 })
