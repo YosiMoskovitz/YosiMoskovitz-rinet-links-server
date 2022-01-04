@@ -1,8 +1,12 @@
 
 import bcrypt from 'bcrypt'
 import { User, validate } from "../model/user.js"
-import Auth from '../middlewares/JwtAuth.js'
+import Auth from '../middlewares/auth.js'
 
+var errorObj = {
+    code: 500,
+    message: "SERVER_ERROR"
+}
 
 export default {
     signUp: (req, res) => {
@@ -62,12 +66,13 @@ export default {
                 user: {
                     firstName: user.firstName,
                     lastName: user.lastName,
+                    role: user.role
                 },
                 token
             };
 
         }).then((user) => {
-            res.cookie('token', user.token, { httpOnly: true, sameSite: 'None', secure: true }). // 
+            res.cookie('token', user.token, { httpOnly: true, }). // sameSite: 'None', secure: true 
                 status(200).json({
                     user: user.user
                 })
@@ -91,21 +96,24 @@ export default {
             error
         })
     },
-    userAuth: (req, res) => {
-        const userID = req.user.id;
-        User.findOne({ _id: userID }).then((user) => {
+    userAuth: async (req, res) => {
+        try {
+            const user = await User.findById(req.user.id);
             if (!user) {
-                const error = {
-                    code: 404,
-                    message: "USER_NOT_FOUND"
-                }
-                throw error
+                errorObj.code = 404;
+                errorObj.message = "USER_NOT_FOUND";
+                throw errorObj
             }
             res.status(200).json({
                 firstName: user.firstName,
                 lastName: user.lastName,
+                role: user.role
             })
-        })
+        } catch (error) {
+            res.status(error.code).json({
+                error
+            })
+        }
     },
     getUsers: (req, res) => {
         User.find().then((users) => {
@@ -113,10 +121,13 @@ export default {
                 users
             })
         }).catch(error => {
-            res.status(500).json({
-                error
+            if (!error.code) error.code = 500;
+            if (!error.message) error.message = 'INTERNAL_ERROR'
+            res.status(error.code).json({
+                message: error.message
             })
         })
-    }
+    },
 
 }
+

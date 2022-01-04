@@ -13,7 +13,14 @@ export default {
                 throw error
             }
             const user = jwt.verify(token, process.env.JWT_KEY);
-            req.user = {id: user.id};
+            if (!user.id) {
+                const error = {
+                    code: 401,
+                    message: "Token not valid or expired" 
+                }
+                throw error
+            }
+            req.user = user;
             next();
         } catch (error) {
             res.status(401).json({
@@ -23,10 +30,26 @@ export default {
     },
     createToken: (user) => {
         const accessToken = jwt.sign({
-            id: user._id, email: user.email
+            id: user._id, email: user.email, role: user.role
         },
             process.env.JWT_KEY,
             { expiresIn: '1d' });
         return accessToken;
+    },
+    isAdmin: (req, res, next) => {
+        try {
+            if (req.user.role !== 'admin') {
+                const error = {
+                    code: 401,
+                    message: 'Unauthorized user'
+                }
+                throw error;
+            }
+            next();
+        } catch (error) {
+            res.status(error.code).json({
+                message: error.message,
+             })
+        }
     },
 }

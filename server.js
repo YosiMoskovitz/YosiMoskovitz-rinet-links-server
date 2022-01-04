@@ -18,37 +18,31 @@ const app = express();
 const port = process.env.PORT || 3001
 
 mongoose.connect(process.env.MONGO_CONNECTION, {
-    useUnifiedTopology: true,
-    useNewUrlParser: true,
-    useCreateIndex: true
+  useUnifiedTopology: true,
+  useNewUrlParser: true,
+  useCreateIndex: true
 });
 
 mongoose.connection.on('connected', () => {
-    console.log('mongoDB Connected!')
+  console.log('mongoDB Connected!')
 })
 
 app.use(morgan('dev'));
 app.use(express.json());
 app.use(cookieParser())
 app.use(express.urlencoded({
-    extended: false
+  extended: false
 }))
 
 //dev cors allowance
-// const corsOptionsDelegate = (req, cb)=> {
-//     var corsOptions = {
-//         credentials: true,
+// const corsOptions = (req, cb)=> {
+//     var corsOptionsDelegate = {
+//         corsOptionsDelegate: true,
 //         origin: req.header('Origin'),
 //       }
-//       cb(null, corsOptions)
+//       cb(null, corsOptionsDelegate)
 // }
 
-var allowlist = [
-    'https://rinet-links.vercel.app',
-    'https://rinet-links-client-j675gdkog-yosimoskovitz.vercel.app',
-    'https://rinet-links-client.vercel.app',
-    'http://localhost:3000'
-    ]
 // var corsOptionsDelegate = (req, callback) => {
 //     var corsOptions;
 //     if (allowlist.includes(req.header.origin)) {
@@ -61,16 +55,23 @@ var allowlist = [
 //     callback(null, corsOptions) // callback expects two parameters: error and options
 // }
 
+var allowlist = [
+  'https://rinet-links.vercel.app',
+  'https://rinet-links-client-j675gdkog-yosimoskovitz.vercel.app',
+  'https://rinet-links-client.vercel.app',
+  'http://localhost:3000'
+]
+
 const corsOptions = {
-    credentials: true,
-    origin: (origin, callback) => {
-      if (allowlist.indexOf(origin) !== -1) {
-        callback(null, true)
-      } else {
-        callback(new Error('Blocked By CORS!'))
-      }
+  credentials: true,
+  origin: (origin, callback) => {
+    if (allowlist.indexOf(origin) !== -1) {
+      callback(null, true)
+    } else {
+      callback(new Error('Blocked By CORS!'))
     }
   }
+}
 app.use(cors(corsOptions));
 
 
@@ -84,16 +85,16 @@ app.use(resetPass.PATH, resetPass.router)
 
 
 app.use((req, res, next) => {
-    const error = new Error('NOT FOUND!');
-    error.status = 404
-    next(error);
+  const error = new Error('NOT FOUND!');
+  error.status = 404
+  next(error);
 });
 
 app.use((error, req, res, next) => {
-    res.status(error.status || 500);
-    res.json({
-        message: error.message
-    })
+  res.status(error.status || 500);
+  res.json({
+    message: error.message
+  })
 })
 
 app.listen(port, () => console.log(`Listening on Port ${port}`));

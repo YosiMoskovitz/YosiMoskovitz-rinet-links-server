@@ -1,6 +1,6 @@
 
 import express from 'express'
-import Auth from '../middlewares/JwtAuth.js';
+import Auth from '../middlewares/auth.js';
 
 const router = express.Router();
 const PATH = "/services/mail";
