@@ -11,7 +11,7 @@ const drive = google.drive({
     auth: oAuth2Client
 })
 
-// const folderId = '1sbqc8E5T3r2jbZF1mIfPyXaPWnO4RLjT';
+ const folderId = '1ZH6_mv_2a1Gn_dUnsLGdi8Dv9yGsDb5c';
 
 export default {
     uploadFile: (req, res) => {
@@ -23,7 +23,7 @@ export default {
         try {
             const fileMetadata = {
                 name: req.file.originalname,
-                // parents: [folderId]
+                parents: [folderId]
             };
             const media = {
                 mimeType: req.file.mimetype,

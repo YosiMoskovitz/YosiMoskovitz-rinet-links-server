@@ -11,6 +11,7 @@ import users from './api/routes/users.js'
 import categories from './api/routes/categories.js'
 import googleDrive from './api/routes/gDrive.js'
 import mailer from './api/routes/gmailer.js'
+import resetPass from './api/routes/passwordRest.js'
 
 dotenv.config();
 const app = express();
@@ -76,8 +77,9 @@ app.use(cors(corsOptions));
 app.use(links.PATH, links.router)
 app.use(users.PATH, users.router);
 app.use(categories.PATH, categories.router);
-app.use(googleDrive.PATH, googleDrive.router)
-app.use(mailer.PATH, mailer.router)
+app.use(googleDrive.PATH, googleDrive.router);
+app.use(mailer.PATH, mailer.router);
+app.use(resetPass.PATH, resetPass.router)
 
 
 

@@ -1,11 +1,14 @@
 
 import bcrypt from 'bcrypt'
-import User from "../model/user.js"
+import { User, validate } from "../model/user.js"
 import Auth from '../middlewares/JwtAuth.js'
 
 
 export default {
     signUp: (req, res) => {
+        const { error } = validate(req.body);
+        if (error) return res.status(400).send(error.details[0].message);
+
         const { email, password, firstName, lastName, role } = req.body;
         User.findOne({ email }).then(async (user) => {
             if (user) {
@@ -64,7 +67,7 @@ export default {
             };
 
         }).then((user) => {
-            res.cookie('token', user.token, { httpOnly: true,  sameSite: 'None', secure: true}). // 
+            res.cookie('token', user.token, { httpOnly: true, sameSite: 'None', secure: true }). // 
                 status(200).json({
                     user: user.user
                 })
@@ -81,7 +84,7 @@ export default {
         })
     },
     getUserByEmail: (req, res) => {
-        const email  = req.params.email;
+        const email = req.params.email;
         User.findOne({ email }).then((user) => {
             user != null ? res.status(302).json(user) : res.status(404).json('NOT_FOUND')
         }).catch((error) => {
@@ -90,7 +93,7 @@ export default {
     },
     userAuth: (req, res) => {
         const userID = req.user.id;
-        User.findOne({ _id: userID }).then((user)=> {
+        User.findOne({ _id: userID }).then((user) => {
             if (!user) {
                 const error = {
                     code: 404,
@@ -104,7 +107,7 @@ export default {
             })
         })
     },
-    getUsers : (req, res) => {
+    getUsers: (req, res) => {
         User.find().then((users) => {
             res.status(200).json({
                 users
@@ -115,5 +118,5 @@ export default {
             })
         })
     }
-    
+
 }

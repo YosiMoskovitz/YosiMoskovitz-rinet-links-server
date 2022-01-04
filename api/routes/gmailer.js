@@ -5,9 +5,9 @@ import Auth from '../middlewares/JwtAuth.js';
 const router = express.Router();
 const PATH = "/services/mail";
 
-import  { sendMail }  from '../mail/mail.js'
+import  { sendEmail }  from '../middlewares/mail.js'
 
-router.get('/send', sendMail);
+router.get('/send', sendEmail);
 
 export default {
     PATH,
