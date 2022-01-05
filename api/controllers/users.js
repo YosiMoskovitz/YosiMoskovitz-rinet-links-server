@@ -2,6 +2,7 @@
 import bcrypt from 'bcrypt'
 import { User, validate } from "../model/user.js"
 import Auth from '../middlewares/auth.js'
+import { sendVerificationEmail } from './newUserVeri.js'
 
 var errorObj = {
     code: 500,
@@ -13,27 +14,28 @@ export default {
         const { error } = validate(req.body);
         if (error) return res.status(400).send(error.details[0].message);
 
-        const { email, password, firstName, lastName, role } = req.body;
+        const { email, password, firstName, lastName } = req.body;
         User.findOne({ email }).then(async (user) => {
             if (user) {
-                const error = {
-                    code: 409,
-                    message: "User already exist!"
-                }
-                throw error
-            }
+                errorObj.code = 409;
+                errorObj.message = "Email already in use!";
+                throw errorObj;
+            } 
+
             var hashPass = await bcrypt.hash(password, 10)
             const newUser = new User({
                 email,
                 password: hashPass,
                 firstName,
                 lastName,
-                role
             })
-            return newUser.save()
+            newUser.save();
+            const isSent = await sendVerificationEmail(newUser);
+            if (isSent === 'OK') return true
+            else throw isSent;
         }).then(() => {
             res.status(200).json({
-                message: 'New User Created '
+                message: 'New User Created'
             })
         }).catch((error) => {
             if (!error.code) {
@@ -47,11 +49,19 @@ export default {
         const { email, password } = req.body;
         User.findOne({ email }).then(async (user) => {
             if (!user) {
-                const error = {
-                    code: 401,
-                    message: "Auth Failed"
-                }
-                throw error
+                errorObj.code = 409;
+                errorObj.message = "Auth Failed";
+                throw errorObj
+            }
+            if (user.status === 'pending') {
+                errorObj.code = 409;
+                errorObj.message = "awaiting email verification";
+                throw errorObj
+            }
+            if (user.status === 'disabled') {
+                errorObj.code = 409;
+                errorObj.message = "account Suspended";
+                throw errorObj
             }
             var validPass = await bcrypt.compare(password, user.password)
             if (!validPass) {

@@ -23,7 +23,7 @@ export const sendEmail = async (email, subject, text, html) => {
         })
 
         const mailOptions = {
-            from: `Service Rinet Links<${process.env.MAIL_USER}>`,
+            from: `Rinet Links<${process.env.MAIL_USER}>`,
             to: email,
             subject,
             text,
