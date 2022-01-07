@@ -12,7 +12,11 @@ var errorObj = {
 export default {
     signUp: (req, res) => {
         const { error } = validate(req.body);
-        if (error) return res.status(400).send(error.details[0].message);
+        if (error) {
+            errorObj.code = 400;
+            errorObj.message = error.details[0].message;
+            throw errorObj;
+        } 
 
         const { email, password, firstName, lastName } = req.body;
         User.findOne({ email }).then(async (user) => {
@@ -29,7 +33,7 @@ export default {
                 firstName,
                 lastName,
             })
-            newUser.save();
+            await newUser.save();
             const isSent = await sendVerificationEmail(newUser);
             if (isSent === 'OK') return true
             else throw isSent;
@@ -71,20 +75,21 @@ export default {
                 }
                 throw error
             }
+
+            user.lastLogin = Date.now();
+            await user.save();
+
             const token = Auth.createToken(user);
+
             return {
-                user: {
-                    firstName: user.firstName,
-                    lastName: user.lastName,
-                    role: user.role
-                },
-                token
+                user: user.toJSON(),
+                token,
             };
 
-        }).then((user) => {
-            res.cookie('token', user.token, { httpOnly: true, sameSite: 'None', secure: true }). // 
+        }).then((data) => {
+            res.cookie('token', data.token, { httpOnly: true, sameSite: 'None', secure: true }). // 
                 status(200).json({
-                    user: user.user
+                    user: data.user
                 })
         }).catch((error) => {
             if (!error.code) {
@@ -115,9 +120,7 @@ export default {
                 throw errorObj
             }
             res.status(200).json({
-                firstName: user.firstName,
-                lastName: user.lastName,
-                role: user.role
+                user: user.toJSON()
             })
         } catch (error) {
             res.status(error.code).json({

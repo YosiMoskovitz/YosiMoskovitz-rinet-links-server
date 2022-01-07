@@ -78,7 +78,6 @@ export default {
         }
     },
     resetPassword: async (req, res) => {
-        console.log(req.body)
         try {
             const schema = Joi.object({ userId: Joi.string().required(), token: Joi.string().required(), password: Joi.string().required() });
             const { error } = schema.validate(req.body);
@@ -100,6 +99,7 @@ export default {
             if (!token) throw invalidError;
 
             user.password = await bcrypt.hash(req.body.password, 10);
+            user.lastPassChange = Date.now();
             await user.save();
             await token.delete();
 
