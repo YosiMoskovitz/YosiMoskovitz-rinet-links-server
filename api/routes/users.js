@@ -13,7 +13,7 @@ router.get('/auth',Auth.checkAuth, controller.userAuth);
 router.get('/all', Auth.checkAuth, Auth.isAdmin, controller.getUsers)
 router.post('/login', controller.login);
 router.post('/logout', Auth.checkAuth, controller.logout);
-router.post('/change-password', Auth.checkAuth, controller.changePassword);
+router.post('/change-password', Auth.checkAuth, controller.logout, controller.changePassword);
 router.post('/delete-user', Auth.checkAuth, controller.deleteUser);
 router.get('/:email', controller.getUserByEmail);
 
