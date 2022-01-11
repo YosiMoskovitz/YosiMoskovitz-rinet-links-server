@@ -3,6 +3,8 @@ import bcrypt from 'bcrypt'
 import { User, validate } from "../model/user.js"
 import Auth from '../middlewares/auth.js'
 import { sendVerificationEmail } from './newUserVeri.js'
+import Joi from 'joi'
+import { passwordHasChanged } from '../mail/mailFuncs.js'
 
 var errorObj = {
     code: 500,
@@ -22,7 +24,7 @@ export default {
         User.findOne({ email }).then(async (user) => {
             if (user) {
                 errorObj.code = 409;
-                errorObj.message = "Email already in use!";
+                errorObj.message = "email_already_in_use!";
                 throw errorObj;
             } 
 
@@ -54,24 +56,24 @@ export default {
         User.findOne({ email }).then(async (user) => {
             if (!user) {
                 errorObj.code = 409;
-                errorObj.message = "Auth Failed";
+                errorObj.message = "Auth_Failed";
                 throw errorObj
             }
             if (user.status === 'pending') {
                 errorObj.code = 409;
-                errorObj.message = "awaiting email verification";
+                errorObj.message = "awaiting_email_verification";
                 throw errorObj
             }
             if (user.status === 'disabled') {
                 errorObj.code = 409;
-                errorObj.message = "account Suspended";
+                errorObj.message = "account_Suspended";
                 throw errorObj
             }
             var validPass = await bcrypt.compare(password, user.password)
             if (!validPass) {
                 const error = {
                     code: 409,
-                    message: "Auth Failed"
+                    message: "Auth_Failed"
                 }
                 throw error
             }
@@ -124,7 +126,7 @@ export default {
             })
         } catch (error) {
             res.status(error.code).json({
-                error
+                message: error.message
             })
         }
     },
@@ -136,11 +138,66 @@ export default {
         }).catch(error => {
             if (!error.code) error.code = 500;
             if (!error.message) error.message = 'INTERNAL_ERROR'
-            res.status(error.code).json({
-                message: error.message
-            })
+            res.status(error.code).json(error.message)
         })
     },
+    changePassword: async (req, res) => {
+        try {
+            const schema = Joi.object({oldPassword: Joi.string().required(), newPassword: Joi.string().required()});
+            const { error } = schema.validate(req.body);
+            if (error) {
+                const err = {
+                    code: 400,
+                    message: error.details[0].message
+                }
+                throw err
+            }
+            const {oldPassword, newPassword} = req.body;
+
+            const user = await User.findById(req.user.id);
+            if (!user) {
+                errorObj.code = 400;
+                errorObj.message = 'USER_NOT_FOUND';
+                throw errorObj
+            };
+
+            var isOldPassValid = await bcrypt.compare(oldPassword, user.password)
+            if (!isOldPassValid) {
+                errorObj.code = 409;
+                errorObj.message = 'Invalid_old_pass';
+                throw errorObj
+            }
+
+            user.password = await bcrypt.hash(newPassword, 10);
+            user.lastPassChange = Date.now();
+            await user.save();
+
+            const result = await passwordHasChanged(user);
+            const emailError =  result !== 'OK' ? result : null
+            emailError ? console.error(emailError) : null;
+            
+            res.status(200).json('password_changed_successfully');
+        } catch (error) {
+            if (!error.code) error.code = 500
+            if (!error.message) error.message = 'SERVER_ERROR'
+            res.status(error.code).json(error.message)
+        }
+    },
+    deleteUser: async (req, res) => {
+        try {
+            const user = await User.findById(req.user.id);
+            //logout
+            await user.delete();
+
+            res.status(200).json({
+                message: 'user_deleted',
+            });
+        } catch (error) {
+            if (!error.code) error.code = 500
+            if (!error.message) error.message = 'SERVER_ERROR'
+            res.status(error.code).json(error.message)
+        }
+    }
 
 }
 

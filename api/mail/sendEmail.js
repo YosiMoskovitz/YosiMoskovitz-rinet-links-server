@@ -39,10 +39,10 @@ export const sendTokenMail = async (HtmlPath, url, subject, user) => {
         };
         const htmlToSend = template(replacements);
 
-        await sendEmail(user.email, subject, link, htmlToSend);
-
-        return 200;
-
+        const res = await sendEmail(user.email, subject, link, htmlToSend);
+        const resCode = res.response.split(' ')
+        if (resCode[2] === 'OK') return 200;
+        else throw res
     } catch (error) {
         return error
     }
@@ -59,8 +59,10 @@ export const sendInfoMail = async (HtmlPath, subject, user, text) => {
         };
         const htmlToSend = template(replacements);
 
-        await sendEmail(user.email, subject, text, htmlToSend);
-
+        const res = await sendEmail(user.email, subject, text, htmlToSend);
+        const resCode = res.response.split(' ')
+        if (resCode[2] === 'OK') return 200;
+        else throw res
         return 200;
 
     } catch (error) {

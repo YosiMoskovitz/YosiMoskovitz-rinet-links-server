@@ -5,10 +5,11 @@ import Joi from 'joi'
 import { User } from "../model/user.js"
 import Token from '../model/restToken.js'
 import { sendTokenMail } from '../mail/sendEmail.js'
+import { passwordHasChanged } from '../mail/mailFuncs.js'
 
 
 
-const invalidError = {
+var invalidError = {
     code: 400,
     message: "invalid link or expired"
 }
@@ -19,10 +20,16 @@ export default {
         try {
             const schema = Joi.object({ email: Joi.string().email().required() });
             const { error } = schema.validate(req.body);
-            if (error) throw invalidError.message = error.details[0].message;
+            if (error) {
+                invalidError.message = error.details[0].message;
+                throw invalidError
+            }
     
             const user = await User.findOne({ email: req.body.email });
-            if (!user) throw invalidError.message = "user with given email doesn't exist";
+            if (!user){
+                invalidError.message = "user_with_given_email_doesn't_exist";
+                throw invalidError
+            } 
 
             const result = await sendTokenMail(
                 '../mail/htmlTemplates/resetPass.html',
@@ -30,13 +37,11 @@ export default {
                 "איפוס סיסמה לאתר Rinet Links",
                 user
             );
-            
-            if (result === 200)
-
-            res.status(200).json({
-                message: 'password reset link sent to your email account'
-            });
-
+            if (result === 200){
+                res.status(200).json({
+                    message: 'password reset link sent to your email account'
+                });
+            }
             else throw result
 
         } catch (error) {
@@ -103,8 +108,12 @@ export default {
             await user.save();
             await token.delete();
 
+            const result = await passwordHasChanged(user);
+            const emailError =  result !== 'OK' ? result : null
+
             res.status(200).json({
-                message: 'password reset successfully',
+                message: 'password_reset_successfully',
+                emailError
             });
         } catch (error) {
             if (!error.code) error.code = 500
