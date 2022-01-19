@@ -11,7 +11,7 @@ import users from './api/routes/users.js'
 import categories from './api/routes/categories.js'
 import googleDrive from './api/routes/gDrive.js'
 import mailer from './api/routes/gmailer.js'
-import resetPass from './api/routes/passwordRest.js'
+import resetPass from './api/routes/passwordReset.js'
 
 dotenv.config();
 const app = express();

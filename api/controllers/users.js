@@ -3,8 +3,8 @@ import bcrypt from 'bcrypt'
 import { User, validate } from "../model/user.js"
 import Auth from '../middlewares/auth.js'
 import { sendVerificationEmail } from './newUserVeri.js'
-import Joi from 'joi'
-import { passwordHasChanged } from '../mail/mailFuncs.js'
+import Joi from 'joi';
+import { passwordHasChangedEmail } from '../mail/mailFuncs.js'
 
 var errorObj = {
     code: 500,
@@ -41,7 +41,7 @@ export default {
             else throw isSent;
         }).then(() => {
             res.status(200).json({
-                message: 'New User Created'
+                message: 'New_User_Created'
             })
         }).catch((error) => {
             if (!error.code) {
@@ -105,14 +105,6 @@ export default {
             status: 'OK'
         })
     },
-    getUserByEmail: (req, res) => {
-        const email = req.params.email;
-        User.findOne({ email }).then((user) => {
-            user != null ? res.status(302).json(user) : res.status(404).json('NOT_FOUND')
-        }).catch((error) => {
-            error
-        })
-    },
     userAuth: async (req, res) => {
         try {
             const user = await User.findById(req.user.id);
@@ -130,6 +122,14 @@ export default {
             })
         }
     },
+    getUserByEmail: (req, res) => {
+        const email = req.params.email;
+        User.findOne({ email }).then((user) => {
+            user != null ? res.status(302).json(user) : res.status(404).json('NOT_FOUND')
+        }).catch((error) => {
+            error
+        })
+    },
     getUsers: (req, res) => {
         User.find().then((users) => {
             res.status(200).json({
@@ -143,7 +143,12 @@ export default {
     },
     changePassword: async (req, res) => {
         try {
-            const schema = Joi.object({oldPassword: Joi.string().required(), newPassword: Joi.string().required()});
+            const schema = Joi.object({
+                oldPassword: Joi.string().required(),
+                newPassword: Joi.string().required().
+                pattern(new RegExp(/^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})/)).message({"string.pattern.base":"Weak Password"})
+            });
+
             const { error } = schema.validate(req.body);
             if (error) {
                 const err = {
@@ -171,12 +176,13 @@ export default {
             user.password = await bcrypt.hash(newPassword, 10);
             user.lastPassChange = Date.now();
             await user.save();
-
-            const result = await passwordHasChanged(user);
+            const result = await passwordHasChangedEmail(user);
             const emailError =  result !== 'OK' ? result : null
             emailError ? console.error(emailError) : null;
             
-            res.status(200).json('password_changed_successfully');
+            res.status(200).json({
+                message: 'password_changed_successfully',
+            });
         } catch (error) {
             if (!error.code) error.code = 500
             if (!error.message) error.message = 'SERVER_ERROR'
@@ -197,7 +203,91 @@ export default {
             if (!error.message) error.message = 'SERVER_ERROR'
             res.status(error.code).json(error.message)
         }
-    }
+    },
+    editUserDetailsAdmin: async (req, res) => {
+        try {
+            const schema = Joi.object({
+                userId: Joi.string().required(),
+                firstName: Joi.string().required(),
+                lastName: Joi.string().required(),
+                status: Joi.string(),
+                role: Joi.string(),
+            });
+
+            const { error } = schema.validate(req.body);
+            if (error) {
+                const err = {
+                    code: 400,
+                    message: error.details[0].message
+                }
+                throw err
+            }
+
+            const {userId, firstName, lastName, status, role} = req.body;
+
+            const user = await User.findById(userId);
+            if (!user) {
+                errorObj.code = 400;
+                errorObj.message = 'USER_NOT_FOUND';
+                throw errorObj
+            };
+
+            user.firstName = firstName;
+            user.lastName = lastName;
+            user.status = status;
+            user.role = role;
+            
+            await user.save();
+
+            
+            res.status(200).json({
+                message: 'user_updated_successfully',
+            });
+        } catch (error) {
+            if (!error.code) error.code = 500
+            if (!error.message) error.message = 'SERVER_ERROR'
+            res.status(error.code).json(error.message)
+        }
+    },
+    editUserDetails: async (req, res) => {
+        try {
+            const schema = Joi.object({
+                firstName: Joi.string().required(),
+                lastName: Joi.string().required(),
+            });
+
+            const { error } = schema.validate(req.body);
+            if (error) {
+                const err = {
+                    code: 400,
+                    message: error.details[0].message
+                }
+                throw err
+            }
+
+            const user = await User.findById(req.user.id);
+            if (!user) {
+                errorObj.code = 400;
+                errorObj.message = 'USER_NOT_FOUND';
+                throw errorObj
+            };
+            const {firstName, lastName} = req.body;
+            user.firstName = firstName;
+            user.lastName = lastName;
+
+            await user.save();
+
+            
+            res.status(200).json({
+                message: 'user_updated_successfully',
+            });
+        } catch (error) {
+            if (!error.code) error.code = 500
+            if (!error.message) error.message = 'SERVER_ERROR'
+            res.status(error.code).json(error.message)
+        }
+    },
 
 }
+
 

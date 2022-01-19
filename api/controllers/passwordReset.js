@@ -3,15 +3,15 @@ import bcrypt from 'bcrypt'
 import crypto from 'crypto'
 import Joi from 'joi'
 import { User } from "../model/user.js"
-import Token from '../model/restToken.js'
+import Token from '../model/resetToken.js'
 import { sendTokenMail } from '../mail/sendEmail.js'
-import { passwordHasChanged } from '../mail/mailFuncs.js'
+import { passwordHasChangedEmail } from '../mail/mailFuncs.js'
 
 
 
 var invalidError = {
     code: 400,
-    message: "invalid link or expired"
+    message: "invalid_link_or_expired"
 }
 
 
@@ -39,7 +39,7 @@ export default {
             );
             if (result === 200){
                 res.status(200).json({
-                    message: 'password reset link sent to your email account'
+                    message: 'password_reset_link_sent_to_email'
                 });
             }
             else throw result
@@ -84,7 +84,13 @@ export default {
     },
     resetPassword: async (req, res) => {
         try {
-            const schema = Joi.object({ userId: Joi.string().required(), token: Joi.string().required(), password: Joi.string().required() });
+            const schema = Joi.object({
+                userId: Joi.string().required(),
+                token: Joi.string().required(),
+                password: Joi.string().required().
+                    pattern(new RegExp(/^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})/)).message({"string.pattern.base":"Weak Password"})
+            });
+
             const { error } = schema.validate(req.body);
             if (error) {
                 const err = {
@@ -108,7 +114,7 @@ export default {
             await user.save();
             await token.delete();
 
-            const result = await passwordHasChanged(user);
+            const result = await passwordHasChangedEmail(user);
             const emailError =  result !== 'OK' ? result : null
 
             res.status(200).json({

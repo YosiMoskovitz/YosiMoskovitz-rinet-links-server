@@ -20,7 +20,7 @@ const userSchema = mongoose.Schema({
 });
 
 userSchema.set('toJSON', {
-    // virtuals: true, // convert _id to id
+    virtuals: true, // convert _id to id
     versionKey: false,
     transform: function (doc, ret) {
         // remove these props when object is serialized
@@ -34,7 +34,7 @@ const User = mongoose.model('User', userSchema)
 const validate = (user) => {
     const schema = Joi.object({
         email: Joi.string().email().required(),
-        password: Joi.string().min(6).required(),
+        password: Joi.string().required().pattern(new RegExp(/^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})/)).message({"string.pattern.base":"Weak Password"}),
         role: Joi.string(),
         firstName: Joi.string().required(),
         lastName: Joi.string().required(),

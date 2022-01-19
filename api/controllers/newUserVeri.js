@@ -1,11 +1,11 @@
 
 import { User } from "../model/user.js"
-import Token from '../model/restToken.js'
+import Token from '../model/resetToken.js'
 import { sendTokenMail, sendInfoMail } from '../mail/sendEmail.js'
 
 var invalidError = {
     code: 400,
-    message: "invalid link or expired"
+    message: "invalid_link_or_expired"
 }
 
 export const sendVerificationEmail = async (user) => {
@@ -54,7 +54,7 @@ export const accountVerify = async (req, res) => {
         const emailError =  result !== 'OK' ? result : null
 
         res.status(200).json({
-            message: 'Account Verified',
+            message: 'Account_Verified',
             emailError
         });
 
