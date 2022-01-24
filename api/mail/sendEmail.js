@@ -40,9 +40,16 @@ export const sendTokenMail = async (HtmlPath, url, subject, user) => {
         const htmlToSend = template(replacements);
 
         const res = await sendEmail(user.email, subject, link, htmlToSend);
-        const resCode = res.response.split(' ')
-        if (resCode[2] === 'OK') return 200;
-        else throw res
+        try {
+            const resCode = res.response.split(' ')
+            if (resCode[2] === 'OK') return 200;
+        } catch (error) {
+            console.log(error);
+            let err = error
+            err.code = 500;
+            err.message = 'Email Error'
+            return err
+        }
     } catch (error) {
         return error
     }
@@ -60,10 +67,17 @@ export const sendInfoMail = async (HtmlPath, subject, user, text) => {
         const htmlToSend = template(replacements);
 
         const res = await sendEmail(user.email, subject, text, htmlToSend);
-        const resCode = res.response.split(' ')
-        if (resCode[2] === 'OK') return 200;
-        else throw res
-        return 200;
+
+        try {
+            const resCode = res.response.split(' ')
+            if (resCode[2] === 'OK') return 200;
+        } catch (error) {
+            console.log(error);
+            let err = error
+            err.code = 500;
+            err.message = 'Email Error'
+            return err
+        }
 
     } catch (error) {
         return error

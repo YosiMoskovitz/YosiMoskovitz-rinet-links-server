@@ -8,15 +8,17 @@ const userSchema = mongoose.Schema({
         required: true,
         unique: true,
         match: /[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/
-        },
+    },
     password: { type: String, required: true },
-    lastPassChange: { type: Date, default: Date.now},
-    role: { type: String, default: 'user'},
+    lastPassChange: { type: Date, default: Date.now },
+    role: { type: mongoose.Schema.Types.ObjectId, required: true, ref: 'Roles' },
     firstName: { type: String, required: true },
     lastName: { type: String, required: true },
-    status: { type: String, default: 'pending'},
-    joined: { type: Date, default: Date.now},
-    lastLogin: { type: Date}
+    status: { type: mongoose.Schema.Types.ObjectId, required: true, ref: 'Statuses' },
+    joined: { type: Date, default: Date.now },
+    lastLogin: { type: Date, default: null },
+    isEmailVerified: { type: Boolean, default: false},
+    createdVia: {type: String, default: 'Signup'}
 });
 
 userSchema.set('toJSON', {
@@ -29,21 +31,51 @@ userSchema.set('toJSON', {
     }
 });
 
+userSchema.method('adminGetAll', function () {
+    var obj = this.toJSON();
+    //Rename fields
+
+    let objectOrder = {
+        'id': null,
+        'email': null,
+        'firstName': null,
+        'lastName': null,
+        'role': null,
+        'status': null,
+        'createdVia': null,
+        'isEmailVerified': null,
+        'joined': null,
+        'lastLogin': null,
+    }
+
+    obj = Object.assign(objectOrder, obj);
+
+    return obj;
+});
+
 const User = mongoose.model('User', userSchema)
 
 const validate = (user) => {
     const schema = Joi.object({
         email: Joi.string().email().required(),
-        password: Joi.string().required().pattern(new RegExp(/^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})/)).message({"string.pattern.base":"Weak Password"}),
-        role: Joi.string(),
+        password: Joi.string().required().pattern(passRegex).message({ "string.pattern.base": "Weak Password" }),
         firstName: Joi.string().required(),
         lastName: Joi.string().required(),
-        status: Joi.string(),
+        role: Joi.custom(ObjIdValidator),
+        status: Joi.custom(ObjIdValidator),
     });
     return schema.validate(user);
 }
 
-export{
+const ObjIdValidator = (val, helper)=> {
+    if (val === undefined) return true;
+    if (mongoose.Types.ObjectId.isValid(val)) return true
+    else return helper.message("Must Be A Valid ObjectId")
+}
+
+const passRegex = new RegExp(/^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})/);
+
+export {
     User,
     validate
 } 

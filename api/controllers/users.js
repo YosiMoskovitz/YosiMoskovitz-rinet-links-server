@@ -1,6 +1,8 @@
 
 import bcrypt from 'bcrypt'
 import { User, validate } from "../model/user.js"
+import Status from "../model/statuses.js"
+import Role from "../model/roles.js"
 import Auth from '../middlewares/auth.js'
 import { sendVerificationEmail } from './newUserVeri.js'
 import Joi from 'joi';
@@ -28,16 +30,22 @@ export default {
                 throw errorObj;
             } 
 
-            var hashPass = await bcrypt.hash(password, 10)
+            var hashPass = await bcrypt.hash(password, 10);
+            var status = await Status.findOne({title: 'pending'});
+            var role = await Role.findOne({title: 'user'});
             const newUser = new User({
                 email,
                 password: hashPass,
                 firstName,
                 lastName,
+                status: status._id,
+                role: role._id,
             })
-            await newUser.save();
             const isSent = await sendVerificationEmail(newUser);
-            if (isSent === 'OK') return true
+            if (isSent === 'OK') {
+                await newUser.save();
+                return true
+            }
             else throw isSent;
         }).then(() => {
             res.status(200).json({
@@ -53,18 +61,18 @@ export default {
     },
     login: (req, res) => {
         const { email, password } = req.body;
-        User.findOne({ email }).then(async (user) => {
+        User.findOne({ email }).populate('role').populate('status').then(async (user) => {
             if (!user) {
                 errorObj.code = 409;
                 errorObj.message = "Auth_Failed";
                 throw errorObj
             }
-            if (user.status === 'pending') {
+            if (user.status.title === 'pending') {
                 errorObj.code = 409;
                 errorObj.message = "awaiting_email_verification";
                 throw errorObj
             }
-            if (user.status === 'disabled') {
+            if (user.status.title === 'disabled') {
                 errorObj.code = 409;
                 errorObj.message = "account_Suspended";
                 throw errorObj
@@ -107,7 +115,7 @@ export default {
     },
     userAuth: async (req, res) => {
         try {
-            const user = await User.findById(req.user.id);
+            const user = await User.findById(req.user.id).populate('role').populate('status');
             if (!user) {
                 errorObj.code = 404;
                 errorObj.message = "USER_NOT_FOUND";
@@ -131,7 +139,10 @@ export default {
         })
     },
     getUsers: (req, res) => {
-        User.find().then((users) => {
+        User.find().then((usersData) => {
+            var users = usersData.map((user) => {
+                return user.adminGetAll();
+            })
             res.status(200).json({
                 users
             })
@@ -208,6 +219,7 @@ export default {
         try {
             const schema = Joi.object({
                 userId: Joi.string().required(),
+                email: Joi.string().required(),
                 firstName: Joi.string().required(),
                 lastName: Joi.string().required(),
                 status: Joi.string(),
@@ -227,7 +239,7 @@ export default {
 
             const user = await User.findById(userId);
             if (!user) {
-                errorObj.code = 400;
+                errorObj.code = 404;
                 errorObj.message = 'USER_NOT_FOUND';
                 throw errorObj
             };
@@ -241,7 +253,7 @@ export default {
 
             
             res.status(200).json({
-                message: 'user_updated_successfully',
+                message: 'Admin_user_updated_successfully',
             });
         } catch (error) {
             if (!error.code) error.code = 500
@@ -267,7 +279,7 @@ export default {
 
             const user = await User.findById(req.user.id);
             if (!user) {
-                errorObj.code = 400;
+                errorObj.code = 4004;
                 errorObj.message = 'USER_NOT_FOUND';
                 throw errorObj
             };
@@ -280,6 +292,68 @@ export default {
             
             res.status(200).json({
                 message: 'user_updated_successfully',
+            });
+        } catch (error) {
+            if (!error.code) error.code = 500
+            if (!error.message) error.message = 'SERVER_ERROR'
+            res.status(error.code).json(error.message)
+        }
+    },
+    addUser: (req, res) => {
+        const { error } = validate(req.body);
+        if (error) {
+            errorObj.code = 400;
+            errorObj.message = error.details[0].message;
+            throw errorObj;
+        } 
+
+        const { email, password, firstName, lastName, role, status } = req.body;
+        User.findOne({ email }).then(async (user) => {
+            if (user) {
+                errorObj.code = 409;
+                errorObj.message = "email_already_in_use!";
+                throw errorObj;
+            } 
+
+            var hashPass = await bcrypt.hash(password, 10);
+
+            const newUser = new User({
+                email,
+                password: hashPass,
+                firstName,
+                lastName,
+                status,
+                role,
+                createdVia : 'Admin'
+            })
+            await newUser.save();
+            return true
+            
+        }).then(() => {
+            res.status(200).json({
+                message: 'Admin_New_User_Created'
+            })
+        }).catch((error) => {
+            if (!error.code) {
+                error.code = 500
+            }
+            res.status(error.code).json(error.message)
+        });
+
+    },
+    deleteUserAdmin: async (req, res) => {
+        try {
+            const userId = req.params.userId;
+            const user = await User.findById(userId);
+            if (!user) {
+                errorObj.code = 404;
+                errorObj.message = 'USER_NOT_FOUND';
+                throw errorObj
+            };
+            await user.delete();
+
+            res.status(200).json({
+                message: 'Admin_user_deleted',
             });
         } catch (error) {
             if (!error.code) error.code = 500

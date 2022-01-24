@@ -7,8 +7,8 @@ const PATH = "/links";
 
 import  Controller  from '../controllers/links.js'
 
-router.get('/', Controller.getLinks);
-router.get('/fullData', Controller.getLinksAndCategories);
+router.get('/', Auth.checkAuth, Controller.getLinks);
+router.get('/fullData', Auth.checkAuth, Controller.getLinksAndCategories);
 router.get('/link:linkID', Controller.getLinkById);
 router.get('/category:categoryId', Controller.getLinksByCategory);
 router.post('/', Auth.checkAuth, Auth.isAdmin, Controller.addLink);

@@ -9,6 +9,8 @@ import cookieParser from 'cookie-parser';
 import links from './api/routes/links.js'
 import users from './api/routes/users.js'
 import categories from './api/routes/categories.js'
+import roles from './api/routes/roles.js'
+import statuses from './api/routes/statuses.js'
 import googleDrive from './api/routes/gDrive.js'
 import mailer from './api/routes/gmailer.js'
 import resetPass from './api/routes/passwordReset.js'
@@ -78,6 +80,8 @@ app.use(cors(corsOptions));
 app.use(links.PATH, links.router)
 app.use(users.PATH, users.router);
 app.use(categories.PATH, categories.router);
+app.use(roles.PATH, roles.router);
+app.use(statuses.PATH, statuses.router);
 app.use(googleDrive.PATH, googleDrive.router);
 app.use(mailer.PATH, mailer.router);
 app.use(resetPass.PATH, resetPass.router)

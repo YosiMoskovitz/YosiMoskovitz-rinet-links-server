@@ -1,5 +1,6 @@
 
 import { User } from "../model/user.js"
+import Status from "../model/statuses.js"
 import Token from '../model/resetToken.js'
 import { sendTokenMail, sendInfoMail } from '../mail/sendEmail.js'
 
@@ -38,7 +39,9 @@ export const accountVerify = async (req, res) => {
         });
         if (!token) throw invalidError;
 
-        user.status = 'active';
+        let status = await Status.findOne({title: 'active'})
+        user.status = status._id
+        user.isEmailVerified = true;
         await user.save();
         await token.delete();
 

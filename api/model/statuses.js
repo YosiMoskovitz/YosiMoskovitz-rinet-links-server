@@ -1,21 +1,20 @@
 
 import mongoose from 'mongoose';
 
-const categorySchema = mongoose.Schema({
+const statusesSchema = mongoose.Schema({
     title: { type: String, required: true },
-    description: { type: String, required: true }
 });
 
-categorySchema.set('toJSON', {
-    virtuals: true, // convert _id to id
+statusesSchema.set('toJSON', {
+    virtuals: true,
     versionKey: false,
-        transform: function (doc, ret) {
-        // remove these props when object is serialized
+    transform: function (doc, ret) {
         delete ret._id;
+        delete ret.password;
     }
 });
 
-categorySchema.method('toClient', function() {
+statusesSchema.method('toClient', function() {
     var obj = this.toObject();
     //Rename fields
     obj.id = obj._id;
@@ -31,4 +30,4 @@ categorySchema.method('toClient', function() {
     return obj;
 });
 
-export default mongoose.model('Category', categorySchema)
+export default mongoose.model('Statuses', statusesSchema)

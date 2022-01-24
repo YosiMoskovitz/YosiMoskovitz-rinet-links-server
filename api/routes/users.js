@@ -15,9 +15,11 @@ router.get('/all', Auth.checkAuth, Auth.isAdmin, controller.getUsers)
 router.post('/login', [check("email").normalizeEmail()], controller.login);
 router.post('/logout', Auth.checkAuth, controller.logout);
 router.post('/change-password', Auth.checkAuth, controller.changePassword);
-router.post('/delete-user', Auth.checkAuth, controller.deleteUser, controller.logout);
+router.delete('/delete-user', Auth.checkAuth, controller.deleteUser, controller.logout);
 router.patch('/edit-user-a', Auth.checkAuth, Auth.isAdmin, controller.editUserDetailsAdmin);
 router.patch('/edit-user', Auth.checkAuth, controller.editUserDetails);
+router.post('/add-user', Auth.checkAuth, [check("email").normalizeEmail()], Auth.isAdmin, controller.addUser);
+router.delete('/delete-user-a/:userId', Auth.checkAuth, Auth.isAdmin, controller.deleteUserAdmin);
 router.get('/:email', Auth.checkAuth, controller.getUserByEmail);
 
 export default {

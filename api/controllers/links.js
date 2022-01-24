@@ -102,20 +102,31 @@ export default {
     },
     getLinksAndCategories: (req, res) => {
         var data = {}
-        Links.find().then((links) => {
+        Links.find().then((linksData) => {
+            var links = linksData.map((link) => {
+                return link.toClient();
+            })
             data = { ...data, links }
         }).then(() => {
-            Category.find().then((categories) => {
+            Category.find().then((categoriesData) => {
+                var categories = categoriesData.map((category) => {
+                    return category.toClient();
+                })
                 data = { ...data, categories }
                 res.status(200).json({
                     data
                 })
             })
         }).catch(error => {
+            console.log(error)
                 res.status(500).json({
                     error
                 })
             })
     }
+
+}
+
+const idTo0 = ()=> {
 
 }

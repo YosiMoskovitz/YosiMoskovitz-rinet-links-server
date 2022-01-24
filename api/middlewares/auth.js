@@ -38,7 +38,7 @@ export default {
     },
     isAdmin: (req, res, next) => {
         try {
-            if (req.user.role !== 'admin') {
+            if (req.user.role.title !== 'admin') {
                 const error = {
                     code: 401,
                     message: 'Unauthorized user'
