@@ -3,10 +3,14 @@ import bcrypt from 'bcrypt'
 import { User, validate } from "../model/user.js"
 import Status from "../model/statuses.js"
 import Role from "../model/roles.js"
+import Donation from '../model/donationes.js'
 import Auth from '../middlewares/auth.js'
 import { sendVerificationEmail } from './newUserVeri.js'
 import Joi from 'joi';
 import { passwordHasChangedEmail } from '../mail/mailFuncs.js'
+import Axios from 'axios'
+import dotenv from 'dotenv';
+dotenv.config()
 
 var errorObj = {
     code: 500,
@@ -14,6 +18,21 @@ var errorObj = {
 }
 
 export default {
+    recaptchaVeri: async (req, res) => {
+        var { token } = req.body;
+        var secret = process.env.RECAPTCHA_SECRET_KEY;
+        var result = await Axios.post('https://www.google.com/recaptcha/api/siteverify', {token, secret} )
+        if(result.status === 200) {
+            res.status(200).json({
+                message: 'recaptcha_verified'
+            })
+        }
+        else {
+            res.status(400).json({
+                message: result.message
+            })
+        }
+    },
     signUp: (req, res) => {
         const { error } = validate(req.body);
         if (error) {
@@ -96,10 +115,13 @@ export default {
                 token,
             };
 
-        }).then((data) => {
+        }).then(async (data) => {
+            var user = data.user;
+            const userDonationes = await Donation.find({user: data.user.id});
+            user = {...user, donations: userDonationes}
             res.cookie('token', data.token, { httpOnly: true, sameSite: 'None', secure: true }). // 
                 status(200).json({
-                    user: data.user
+                    user
                 })
         }).catch((error) => {
             if (!error.code) {
@@ -115,14 +137,17 @@ export default {
     },
     userAuth: async (req, res) => {
         try {
-            const user = await User.findById(req.user.id).populate('role').populate('status');
-            if (!user) {
+            const foundUser = await User.findById(req.user.id).populate('role').populate('status');
+            if (!foundUser) {
                 errorObj.code = 404;
                 errorObj.message = "USER_NOT_FOUND";
-                throw errorObj
+                throw errorObj;
             }
+            var user = foundUser.toJSON();
+            const userDonationes = await Donation.find({user: user.id});
+            user = {...user, donations: userDonationes}
             res.status(200).json({
-                user: user.toJSON()
+                user
             })
         } catch (error) {
             res.status(error.code).json({
@@ -222,6 +247,11 @@ export default {
                 email: Joi.string().required(),
                 firstName: Joi.string().required(),
                 lastName: Joi.string().required(),
+                zeout: Joi.string(),
+                country: Joi.string(),
+                city: Joi.string(),
+                street: Joi.string(),
+                phone: Joi.string(),
                 status: Joi.string(),
                 role: Joi.string(),
             });
@@ -235,7 +265,7 @@ export default {
                 throw err
             }
 
-            const {userId, firstName, lastName, status, role} = req.body;
+            const {userId, firstName, lastName, zeout, country, city, street, phone, status, role} = req.body;
 
             const user = await User.findById(userId);
             if (!user) {
@@ -246,6 +276,11 @@ export default {
 
             user.firstName = firstName;
             user.lastName = lastName;
+            user.zeout = zeout,
+            user.country = country,
+            user.city = city,
+            user.street = street,
+            user.phone = phone,
             user.status = status;
             user.role = role;
             
@@ -266,6 +301,11 @@ export default {
             const schema = Joi.object({
                 firstName: Joi.string().required(),
                 lastName: Joi.string().required(),
+                zeout: Joi.string(),
+                country: Joi.string(),
+                city: Joi.string(),
+                street: Joi.string(),
+                phone: Joi.string(),
             });
 
             const { error } = schema.validate(req.body);
@@ -283,9 +323,14 @@ export default {
                 errorObj.message = 'USER_NOT_FOUND';
                 throw errorObj
             };
-            const {firstName, lastName} = req.body;
+            const {firstName, lastName, zeout, country, city, street, phone} = req.body;
             user.firstName = firstName;
             user.lastName = lastName;
+            user.zeout = zeout,
+            user.country = country,
+            user.city = city,
+            user.street = street,
+            user.phone = phone,
 
             await user.save();
 
@@ -307,7 +352,7 @@ export default {
             throw errorObj;
         } 
 
-        const { email, password, firstName, lastName, role, status } = req.body;
+        const { email, password, firstName, lastName, zeout, country, city, street,phone, role, status } = req.body;
         User.findOne({ email }).then(async (user) => {
             if (user) {
                 errorObj.code = 409;
@@ -322,6 +367,7 @@ export default {
                 password: hashPass,
                 firstName,
                 lastName,
+                zeout, country, city, street, phone,
                 status,
                 role,
                 createdVia : 'Admin'

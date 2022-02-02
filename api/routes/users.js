@@ -8,6 +8,7 @@ import Auth from '../middlewares/auth.js'
 import { accountVerify } from '../controllers/newUserVeri.js'
 import { check } from 'express-validator';
 
+router.post('/recaptcha-verification', controller.recaptchaVeri);
 router.post('/signup', [check("email").normalizeEmail()], controller.signUp);
 router.post('/account-verification', accountVerify);
 router.get('/auth',Auth.checkAuth, controller.userAuth);

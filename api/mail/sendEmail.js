@@ -1,7 +1,5 @@
 
 import crypto from 'crypto'
-import Joi from 'joi'
-import { User } from "../model/user.js"
 import Token from '../model/resetToken.js'
 import { sendEmail } from './mailConfig.js'
 import handlebars from 'handlebars';

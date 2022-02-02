@@ -11,6 +11,7 @@ import users from './api/routes/users.js'
 import categories from './api/routes/categories.js'
 import roles from './api/routes/roles.js'
 import statuses from './api/routes/statuses.js'
+import donation from './api/routes/donationes.js'
 import googleDrive from './api/routes/gDrive.js'
 import mailer from './api/routes/gmailer.js'
 import resetPass from './api/routes/passwordReset.js'
@@ -61,7 +62,8 @@ var allowlist = [
   'https://rinet-links.vercel.app',
   'https://rinet-links-client-j675gdkog-yosimoskovitz.vercel.app',
   'https://rinet-links-client.vercel.app',
-  'http://localhost:3000'
+  'http://localhost:3000',
+  'https://matara.pro/nedarimplus'
 ]
 
 const corsOptions = {
@@ -82,6 +84,7 @@ app.use(users.PATH, users.router);
 app.use(categories.PATH, categories.router);
 app.use(roles.PATH, roles.router);
 app.use(statuses.PATH, statuses.router);
+app.use(donation.PATH, donation.router);
 app.use(googleDrive.PATH, googleDrive.router);
 app.use(mailer.PATH, mailer.router);
 app.use(resetPass.PATH, resetPass.router)
