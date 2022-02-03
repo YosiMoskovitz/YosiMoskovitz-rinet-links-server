@@ -247,11 +247,11 @@ export default {
                 email: Joi.string().required(),
                 firstName: Joi.string().required(),
                 lastName: Joi.string().required(),
-                zeout: Joi.string(),
-                country: Joi.string(),
-                city: Joi.string(),
-                street: Joi.string(),
-                phone: Joi.string(),
+                zeout: Joi.string().allow(null, ''),
+                country: Joi.string().allow(null, ''),
+                city: Joi.string().allow(null, ''),
+                street: Joi.string().allow(null, ''),
+                phone: Joi.string().allow(null, ''),
                 status: Joi.string(),
                 role: Joi.string(),
             });
@@ -301,11 +301,11 @@ export default {
             const schema = Joi.object({
                 firstName: Joi.string().required(),
                 lastName: Joi.string().required(),
-                zeout: Joi.string(),
-                country: Joi.string(),
-                city: Joi.string(),
-                street: Joi.string(),
-                phone: Joi.string(),
+                zeout: Joi.string().allow(null, ''),
+                country: Joi.string().allow(null, ''),
+                city: Joi.string().allow(null, ''),
+                street: Joi.string().allow(null, ''),
+                phone: Joi.string().allow(null, ''),
             });
 
             const { error } = schema.validate(req.body);
