@@ -64,7 +64,8 @@ var allowlist = [
   'https://rinet-links-client-j675gdkog-yosimoskovitz.vercel.app',
   'https://rinet-links-client.vercel.app',
   'http://localhost:3000',
-  'https://matara.pro/nedarimplus'
+  'https://matara.pro/nedarimplus',
+  '18.194.219.73'
 ]
 
 const corsOptions = {
