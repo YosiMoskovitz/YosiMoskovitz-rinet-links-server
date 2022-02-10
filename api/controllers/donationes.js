@@ -13,7 +13,9 @@ export default {
             errorObj.code = 404;
             errorObj.message = "USER_NOT_FOUND";
             throw errorObj;
-        } 
+        }
+        
+        const donation = JSON.parse(req.body);
 
         try {
             const {
@@ -22,7 +24,7 @@ export default {
                 Currency,
                 LastNum,
                 Confirmation,
-                Comments} = req.body;
+                Comments} = donation;
     
             const newDonation = new Donation({
                 user: user._id,

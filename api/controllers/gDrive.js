@@ -11,16 +11,15 @@ const drive = google.drive({
     auth: oAuth2Client
 })
 
- const folderId = '1ZH6_mv_2a1Gn_dUnsLGdi8Dv9yGsDb5c';
+const folderId = '1ZH6_mv_2a1Gn_dUnsLGdi8Dv9yGsDb5c';
 
 export default {
     uploadFile: (req, res) => {
-        const bufferStream = new PassThrough();
-        var fileSize = req.file.size;
-    
-        bufferStream.end(req.file.buffer);
-    
         try {
+            const bufferStream = new PassThrough();
+            var fileSize = req.file.size;
+
+            bufferStream.end(req.file.buffer);
             const fileMetadata = {
                 name: req.file.originalname,
                 parents: [folderId]
@@ -42,41 +41,43 @@ export default {
                         const progress = (evt.bytesRead / fileSize) * 100;
                         console.log(`${Math.round(progress)}% complete`)
                     },
-                    
+
                 },
             )
-            .then((response) => {
-                //give public Permission
-                const fileId = response.data.id;
-                drive.permissions.create({
-                    fileId,
-                    requestBody : {
-                        role: 'reader',
-                        type: 'anyone'
-                    }
+                .then((response) => {
+                    //give public Permission
+                    const fileId = response.data.id;
+                    drive.permissions.create({
+                        fileId,
+                        requestBody: {
+                            role: 'reader',
+                            type: 'anyone'
+                        }
+                    })
+                    return fileId;
+                }).then((fileId) => {
+                    //get public url
+                    return drive.files.get({
+                        fileId,
+                        fields: 'webContentLink'
+                    })
+                }).then((response) => {
+                    res.status(200).json({
+                        link: response.data.webContentLink
+                    })
                 })
-                return fileId;
-            }).then((fileId)=>{
-                //get public url
-                return drive.files.get({
-                    fileId,
-                    fields: 'webContentLink'
-                })
-            }).then((response)=> {
-                res.status(200).json({
-                    link : response.data.webContentLink
-                })
-            })
-            .catch((error)=>{
-                res.status(500).json({
-                    error
-                })
-            });
+                .catch((error) => {
+                    res.status(500).json({
+                        error
+                    })
+                });
         } catch (error) {
-            console.log(error.message);
+            res.status(500).json({
+                message: error.message
+            })
         }
     },
-    
+
     deleteFile: (fileId) => {
         try {
             drive.files.delete({
@@ -89,7 +90,7 @@ export default {
             console.log(error.message);
         }
     },
-    
+
     createFolder: (folderName) => {
         var fileMetadata = {
             'name': folderName,
@@ -100,18 +101,21 @@ export default {
             fields: 'id'
         }).then((response) => {
             res.status(200).json({
-                folderID : response.data.id
+                folderID: response.data.id
             })
         });
     },
-    
+
     getFolders: (req, res) => {
         const q = `mimeType = 'application/vnd.google-apps.folder'
                     and '${folderId}' in parents`;
-    
-        drive.files.list({q}).then((response) => {
+
+        drive.files.list({ q }).then((response) => {
             res.json(response.data)
         })
+    },
+    checkFileSize: (req, res) => {
+        console.log(req.body)
     }
-    
+
 }
