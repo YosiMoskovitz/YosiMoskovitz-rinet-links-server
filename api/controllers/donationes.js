@@ -15,8 +15,8 @@ export default {
             throw errorObj;
         }
         
-        const donation = JSON.parse(req.body);
-
+        
+        console.log(req.body)
         try {
             const {
                 TransactionTime,
@@ -24,7 +24,7 @@ export default {
                 Currency,
                 LastNum,
                 Confirmation,
-                Comments} = donation;
+                Comments} = req.body;
     
             const newDonation = new Donation({
                 user: user._id,
