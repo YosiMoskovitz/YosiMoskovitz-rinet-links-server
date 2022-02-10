@@ -70,6 +70,7 @@ var allowlist = [
 const corsOptions = {
   credentials: true,
   origin: (origin, callback) => {
+    console.log(origin)
     if (allowlist.indexOf(origin) !== -1) {
       callback(null, true)
     } else {
