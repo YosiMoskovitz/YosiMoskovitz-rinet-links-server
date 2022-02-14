@@ -67,11 +67,12 @@ var allowlist = [
   'https://matara.pro/nedarimplus'
 ]
 
+//need to know if no-origin allowance is ok.
 const corsOptions = {
   credentials: true,
   origin: (origin, callback) => {
     console.log(origin)
-    if (allowlist.indexOf(origin) !== -1) {
+    if (allowlist.indexOf(origin) !== -1 || !origin) {
       callback(null, true)
     } else {
       callback(new Error('Blocked By CORS!'))
