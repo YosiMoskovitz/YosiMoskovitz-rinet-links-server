@@ -8,7 +8,7 @@ var errorObj = {
 
 export default {
     addDonation: async (req, res) => {
-        console.log("req.headers", req.headers) retuen
+        console.log("req.headers", req.headers)
         // if (!req.headers.forwarded)
         const user = await User.findById(req.params.userId);
         if (!user) {
