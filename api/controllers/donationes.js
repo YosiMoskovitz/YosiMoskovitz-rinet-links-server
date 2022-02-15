@@ -25,6 +25,8 @@ export default {
                 TransactionTime,
                 Amount,
                 Currency,
+                PaymentType,
+                Tashlumim,
                 LastNum,
                 Confirmation,
                 Comments} = req.body;
@@ -34,6 +36,8 @@ export default {
                 TransactionTime,
                 Amount,
                 Currency,
+                PaymentType,
+                Tashlumim,
                 LastNum,
                 Confirmation,
                 Comments,
