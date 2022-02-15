@@ -9,7 +9,7 @@ var errorObj = {
 export default {
     addDonation: async (req, res) => {
         //only allow req from nedarim plus website
-        if (!req.headers['x-forwarded-for'] === '18.194.219.73') throw errorObj
+        if (req.headers['x-forwarded-for'] !== '18.194.219.73') throw errorObj
         
         const user = await User.findById(req.params.userId);
         if (!user) {

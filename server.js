@@ -71,7 +71,6 @@ var allowlist = [
 const corsOptions = {
   credentials: true,
   origin: (origin, callback) => {
-    console.log(origin)
     if (allowlist.indexOf(origin) !== -1 || !origin) {
       callback(null, true)
     } else {
@@ -103,8 +102,6 @@ app.use((req, res, next) => {
 app.use((error, req, res, next) => {
   if (error instanceof multer.MulterError) res.status(418);
   else res.status(error.status || 500);
-  console.log(req.headers)
-  console.log(error.message)
   res.json({
     message: error.message
   })
