@@ -4,11 +4,9 @@ import mongoose from 'mongoose';
 const donationesSchema = mongoose.Schema({
     user: { type: mongoose.Schema.Types.ObjectId, required: true, ref: 'User' },
     time: { type: mongoose.Schema.Types.Date, required: true, default: Date.now()},
-    TransactionTime: { type: mongoose.Schema.Types.String},
     Amount: { type: mongoose.Schema.Types.Number, required: true},
     Currency: { type: mongoose.Schema.Types.String, required: true},
-    PaymentType: { type: mongoose.Schema.Types.String, required: true},
-    Tashlumim: { type: mongoose.Schema.Types.String, required: true},
+    Tashloumim: { type: mongoose.Schema.Types.String},
     LastNum: { type: mongoose.Schema.Types.String, required: true},
     Confirmation: { type: mongoose.Schema.Types.String, required: true},
     Comments: { type: mongoose.Schema.Types.String},
