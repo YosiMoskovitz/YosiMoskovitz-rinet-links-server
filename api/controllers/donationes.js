@@ -50,6 +50,7 @@ export default {
                 message: 'New_Donation_Recorded'
             });
         } catch (error) {
+            console.log(error.message)
             if (!error.code) {
                 error.code = 500
             }
