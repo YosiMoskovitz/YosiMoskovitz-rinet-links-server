@@ -8,17 +8,15 @@ var errorObj = {
 
 export default {
     addDonation: async (req, res) => {
-        console.log("req.headers", req.headers['x-forwarded-for'])
-        // if (!req.headers.forwarded)
+        //only allow req from nedarim plus website
+        if (!req.headers['x-forwarded-for'] === '18.194.219.73') throw errorObj
+        
         const user = await User.findById(req.params.userId);
         if (!user) {
             errorObj.code = 404;
             errorObj.message = "USER_NOT_FOUND";
             throw errorObj;
         }
-        
-        
-        console.log(req.body)
         try {
             const {
                 TransactionTime,
