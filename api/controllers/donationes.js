@@ -11,6 +11,7 @@ export default {
         //only allow req from nedarim plus website
         if (req.headers['x-forwarded-for'] !== '18.194.219.73')
         {
+            console.log('why?')
             throw errorObj
         }
         
