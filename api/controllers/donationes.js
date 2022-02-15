@@ -11,7 +11,10 @@ export default {
         //only allow req from nedarim plus website
         console.log("if =", req.headers['x-forwarded-for'] === '18.194.219.73')
         console.log("req.headers['x-forwarded-for']", req.headers['x-forwarded-for'])
-        if (req.headers['x-forwarded-for'] !== '18.194.219.73') throw errorObj
+        if (req.headers['x-forwarded-for'] !== '18.194.219.73')
+        {
+            throw errorObj
+        }
         
         const user = await User.findById(req.params.userId);
         if (!user) {
