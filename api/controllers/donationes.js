@@ -13,6 +13,7 @@ export default {
         console.log("req.headers['x-forwarded-for']", req.headers['x-forwarded-for'])
         if (req.headers['x-forwarded-for'] !== '18.194.219.73')
         {
+            console.log('did this happened?')
             throw errorObj
         }
         
