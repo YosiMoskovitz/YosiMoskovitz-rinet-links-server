@@ -21,8 +21,8 @@ export default {
     recaptchaVeri: async (req, res) => {
         var { token } = req.body;
         var secret = process.env.RECAPTCHA_SECRET_KEY;
-        var result = await Axios.post('https://www.google.com/recaptcha/api/siteverify', {token, secret} )
-        if(result.status === 200) {
+        var result = await Axios.post('https://www.google.com/recaptcha/api/siteverify', { token, secret })
+        if (result.status === 200) {
             res.status(200).json({
                 message: 'recaptcha_verified'
             })
@@ -39,7 +39,7 @@ export default {
             errorObj.code = 400;
             errorObj.message = error.details[0].message;
             throw errorObj;
-        } 
+        }
 
         const { email, password, firstName, lastName } = req.body;
         User.findOne({ email }).then(async (user) => {
@@ -47,11 +47,11 @@ export default {
                 errorObj.code = 409;
                 errorObj.message = "email_already_in_use!";
                 throw errorObj;
-            } 
+            }
 
             var hashPass = await bcrypt.hash(password, 10);
-            var status = await Status.findOne({title: 'pending'});
-            var role = await Role.findOne({title: 'user'});
+            var status = await Status.findOne({ title: 'pending' });
+            var role = await Role.findOne({ title: 'user' });
             const newUser = new User({
                 email,
                 password: hashPass,
@@ -78,9 +78,11 @@ export default {
         });
 
     },
-    login: (req, res) => {
-        const { email, password } = req.body;
-        User.findOne({ email }).populate('role').populate('status').then(async (user) => {
+    login: async (req, res) => {
+        try {
+            const { email, password } = req.body;
+            let user = await User.findOne({ email }).populate('role').populate('status');
+
             if (!user) {
                 errorObj.code = 409;
                 errorObj.message = "Auth_Failed";
@@ -96,7 +98,7 @@ export default {
                 errorObj.message = "account_Suspended";
                 throw errorObj
             }
-            var validPass = await bcrypt.compare(password, user.password)
+            let validPass = await bcrypt.compare(password, user.password)
             if (!validPass) {
                 const error = {
                     code: 409,
@@ -110,28 +112,32 @@ export default {
 
             const token = Auth.createToken(user);
 
-            return {
+            let data = {
                 user: user.toJSON(),
                 token,
             };
 
-        }).then(async (data) => {
-            var user = data.user;
-            const userDonationes = await Donation.find({user: data.user.id});
-            user = {...user, donations: userDonationes}
+            var _user = data.user;
+            const userDonationes = await Donation.find({ user: data.user.id });
+            _user = { ..._user, donations: userDonationes };
+
             res.cookie('token', data.token, { httpOnly: true, sameSite: 'None', secure: true }). // 
                 status(200).json({
                     user
-                })
-        }).catch((error) => {
+                });
+        } catch (error) {
+
             if (!error.code) {
                 error.code = 500
             }
-            res.status(error.code).json(error.message)
-        });
+            res.status(error.code).json(error.message);
+        }
+
     },
     logout: (req, res) => {
-        res.clearCookie('token').status(200).json({
+        res.cookie('token', null, { httpOnly: true, sameSite: 'None', secure: true, expires: new Date() })
+        .status(200)
+        .json({
             status: 'OK'
         })
     },
@@ -144,8 +150,8 @@ export default {
                 throw errorObj;
             }
             var user = foundUser.toJSON();
-            const userDonationes = await Donation.find({user: user.id});
-            user = {...user, donations: userDonationes}
+            const userDonationes = await Donation.find({ user: user.id });
+            user = { ...user, donations: userDonationes }
             res.status(200).json({
                 user
             })
@@ -182,7 +188,7 @@ export default {
             const schema = Joi.object({
                 oldPassword: Joi.string().required(),
                 newPassword: Joi.string().required().
-                pattern(new RegExp(/^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})/)).message({"string.pattern.base":"Weak Password"})
+                    pattern(new RegExp(/^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})/)).message({ "string.pattern.base": "Weak Password" })
             });
 
             const { error } = schema.validate(req.body);
@@ -193,7 +199,7 @@ export default {
                 }
                 throw err
             }
-            const {oldPassword, newPassword} = req.body;
+            const { oldPassword, newPassword } = req.body;
 
             const user = await User.findById(req.user.id);
             if (!user) {
@@ -213,9 +219,9 @@ export default {
             user.lastPassChange = Date.now();
             await user.save();
             const result = await passwordHasChangedEmail(user);
-            const emailError =  result !== 'OK' ? result : null
+            const emailError = result !== 'OK' ? result : null
             emailError ? console.error(emailError) : null;
-            
+
             res.status(200).json({
                 message: 'password_changed_successfully',
             });
@@ -265,7 +271,7 @@ export default {
                 throw err
             }
 
-            const {userId, firstName, lastName, zeout, country, city, street, phone, status, role} = req.body;
+            const { userId, firstName, lastName, zeout, country, city, street, phone, status, role } = req.body;
 
             const user = await User.findById(userId);
             if (!user) {
@@ -277,16 +283,16 @@ export default {
             user.firstName = firstName;
             user.lastName = lastName;
             user.zeout = zeout,
-            user.country = country,
-            user.city = city,
-            user.street = street,
-            user.phone = phone,
-            user.status = status;
+                user.country = country,
+                user.city = city,
+                user.street = street,
+                user.phone = phone,
+                user.status = status;
             user.role = role;
-            
+
             await user.save();
 
-            
+
             res.status(200).json({
                 message: 'Admin_user_updated_successfully',
             });
@@ -323,18 +329,18 @@ export default {
                 errorObj.message = 'USER_NOT_FOUND';
                 throw errorObj
             };
-            const {firstName, lastName, zeout, country, city, street, phone} = req.body;
+            const { firstName, lastName, zeout, country, city, street, phone } = req.body;
             user.firstName = firstName;
             user.lastName = lastName;
             user.zeout = zeout,
-            user.country = country,
-            user.city = city,
-            user.street = street,
-            user.phone = phone,
+                user.country = country,
+                user.city = city,
+                user.street = street,
+                user.phone = phone,
 
-            await user.save();
+                await user.save();
 
-            
+
             res.status(200).json({
                 message: 'user_updated_successfully',
             });
@@ -350,15 +356,15 @@ export default {
             errorObj.code = 400;
             errorObj.message = error.details[0].message;
             throw errorObj;
-        } 
+        }
 
-        const { email, password, firstName, lastName, zeout, country, city, street,phone, role, status } = req.body;
+        const { email, password, firstName, lastName, zeout, country, city, street, phone, role, status } = req.body;
         User.findOne({ email }).then(async (user) => {
             if (user) {
                 errorObj.code = 409;
                 errorObj.message = "email_already_in_use!";
                 throw errorObj;
-            } 
+            }
 
             var hashPass = await bcrypt.hash(password, 10);
 
@@ -370,11 +376,11 @@ export default {
                 zeout, country, city, street, phone,
                 status,
                 role,
-                createdVia : 'Admin'
+                createdVia: 'Admin'
             })
             await newUser.save();
             return true
-            
+
         }).then(() => {
             res.status(200).json({
                 message: 'Admin_New_User_Created'
