@@ -12,7 +12,7 @@ import Axios from 'axios'
 import dotenv from 'dotenv';
 dotenv.config()
 
-var errorObj = {
+const errorObj = {
     code: 500,
     message: "SERVER_ERROR"
 }
