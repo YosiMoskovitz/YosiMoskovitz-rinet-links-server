@@ -1,6 +1,6 @@
 {
    "version": 2,
-   "name": "rinet-server",
+   "name": "rinet-links-server",
    "builds": [
       { "src": "server.js", "use": "@vercel/node" }
    ],
