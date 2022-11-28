@@ -136,10 +136,10 @@ export default {
     },
     logout: (req, res) => {
         res.cookie('token', null, { httpOnly: true, sameSite: 'None', secure: true, expires: new Date() })
-        .status(200)
-        .json({
-            status: 'OK'
-        })
+            .status(200)
+            .json({
+                status: 'OK'
+            })
     },
     userAuth: async (req, res) => {
         try {
@@ -283,11 +283,11 @@ export default {
             user.firstName = firstName;
             user.lastName = lastName;
             user.zeout = zeout,
-                user.country = country,
-                user.city = city,
-                user.street = street,
-                user.phone = phone,
-                user.status = status;
+            user.country = country,
+            user.city = city,
+            user.street = street,
+            user.phone = phone,
+            user.status = status;
             user.role = role;
 
             await user.save();

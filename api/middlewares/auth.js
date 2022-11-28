@@ -30,7 +30,7 @@ export default {
     },
     createToken: (user) => {
         const accessToken = jwt.sign({
-            id: user._id, email: user.email, role: user.role
+            id: user._id, role: user.role
         },
             process.env.JWT_KEY,
             { expiresIn: '1d' });
