@@ -91,6 +91,9 @@ app.use(googleDrive.PATH, googleDrive.router);
 app.use(mailer.PATH, mailer.router);
 app.use(resetPass.PATH, resetPass.router)
 
+app.get('/', (req, res)=> {
+  res.send('welcome to Rinet-Links server side app')
+});
 
 
 app.use((req, res, next) => {
